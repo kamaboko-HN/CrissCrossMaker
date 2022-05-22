@@ -495,11 +495,11 @@ class Application(tk.Frame):
             new_listbox_data = []
         
         #grid_size = int(self.GridSizeCombobox.get())
-        NewFrame = tk.Frame(self.Notebook, bd=1, bg="yellow")
-        NewGridFrame = tk.Frame(NewFrame, width=(int(grid_size)+2)*25, height=(int(grid_size)+2)*25, bd=1, bg="red")
-        ListboxBigFrame = tk.Frame(NewFrame, height=(int(grid_size)+2)*25, bd=1, bg="blue")
-        ListboxFrame = tk.Frame(ListboxBigFrame, bd=1, bg="gray")
-        ListboxOptionsFrame = tk.Frame(ListboxBigFrame, bd=1, bg="green")
+        NewFrame = tk.Frame(self.Notebook)
+        NewGridFrame = tk.Frame(NewFrame, width=(int(grid_size)+2)*25, height=(int(grid_size)+2)*25)
+        ListboxBigFrame = tk.Frame(NewFrame, height=(int(grid_size)+2)*25)
+        ListboxFrame = tk.Frame(ListboxBigFrame)
+        ListboxOptionsFrame = tk.Frame(ListboxBigFrame)
         NewListbox = tk.Listbox(ListboxFrame, width=40, height=20)
         NewListbox.bind("<<ListboxSelect>>", self.selectword)
         ListboxYBar = tk.Scrollbar(ListboxFrame, orient=tk.VERTICAL)
