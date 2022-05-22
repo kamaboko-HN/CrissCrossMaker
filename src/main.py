@@ -1,7 +1,7 @@
 from cgi import test
 from cgitb import enable
 from copy import deepcopy
-from curses.ascii import TAB
+from email.mime import image
 from ensurepip import version
 from faulthandler import disable
 from hashlib import new
@@ -14,7 +14,7 @@ from tabnanny import check
 from textwrap import fill
 from time import sleep
 import tkinter as tk
-from tkinter import CENTER, FLAT, LEFT, SOLID, Variable, ttk
+from tkinter import CENTER, FLAT, LEFT, SOLID, Image, Variable, ttk
 from tkinter.tix import NoteBook
 from tkinter import filedialog
 from tkinter import messagebox
@@ -391,6 +391,34 @@ class Application(tk.Frame):
         self.SelectLabel.config(text="")
         self.NowNotebook = self.Notebook.select()
 
+    def labelblack(self, event):
+        label_id = event.widget
+        for tabs_data in VL.TabsList:
+            if tabs_data[0] == self.Notebook.select():
+                label_id_list = tabs_data[4]
+                grid_word_list = tabs_data[3]
+                break
+        
+        #Return white
+        for labels in label_id_list:
+            for label in labels:
+                label.config(bg="#404040")
+
+        for labels in label_id_list:
+            if label_id in labels:
+                x_pos = labels.index(label_id)
+                y_pos = label_id_list.index(labels)
+                break
+
+        if grid_word_list[y_pos][x_pos] == 0:
+            grid_word_list[y_pos][x_pos] = 1
+            label_id.config(image=VL.word_img_list[1])
+        elif grid_word_list[y_pos][x_pos] == 1:
+            grid_word_list[y_pos][x_pos] = 0
+            label_id.config(image=VL.word_img_list[0])
+
+
+
     def labelposget(self, event):
         label_id = event.widget
         label_id.config(bg="red")
@@ -399,6 +427,7 @@ class Application(tk.Frame):
                 label_id_list = tabs_data[4]
                 break
         
+        #Return white
         for labels in label_id_list:
             for label in labels:
                 label.config(bg="#404040")
@@ -468,13 +497,15 @@ class Application(tk.Frame):
         #grid_size = int(self.GridSizeCombobox.get())
         NewFrame = tk.Frame(self.Notebook, bd=1, bg="yellow")
         NewGridFrame = tk.Frame(NewFrame, width=(int(grid_size)+2)*25, height=(int(grid_size)+2)*25, bd=1, bg="red")
-        NewListboxFrame = tk.Frame(NewFrame, height=(int(grid_size)+2)*25, bd=1, bg="blue")
-        ListboxOptionsFrame = tk.Frame(NewFrame, bd=1, bg="green")
-        NewListbox = tk.Listbox(NewListboxFrame, width=40, height=20)
+        ListboxBigFrame = tk.Frame(NewFrame, height=(int(grid_size)+2)*25, bd=1, bg="blue")
+        ListboxFrame = tk.Frame(ListboxBigFrame, bd=1, bg="gray")
+        ListboxOptionsFrame = tk.Frame(ListboxBigFrame, bd=1, bg="green")
+        NewListbox = tk.Listbox(ListboxFrame, width=40, height=20)
         NewListbox.bind("<<ListboxSelect>>", self.selectword)
-        ListboxYBar = tk.Scrollbar(NewListboxFrame, orient=tk.VERTICAL)
-        ListboxXBar = tk.Scrollbar(NewListboxFrame, orient=tk.HORIZONTAL)
+        ListboxYBar = tk.Scrollbar(ListboxFrame, orient=tk.VERTICAL)
+        ListboxXBar = tk.Scrollbar(ListboxFrame, orient=tk.HORIZONTAL)
         ListboxWordDelButton = ttk.Button(ListboxOptionsFrame, text="削除", command=self.deleteword)
+        ListboxWordSortButton = ttk.Button(ListboxOptionsFrame, text="音順:降")
         deltabButton = ttk.Button(NewFrame, text="閉じる", command=self.deltab)
 
         #Make new grid  
@@ -488,17 +519,25 @@ class Application(tk.Frame):
                 load_img = VL.word_img_list[grid_list[gridsize_v][gridsize_s]]
                 grid_id_list[gridsize_v].append(tk.Label(S_Frame_list[gridsize_v], image=load_img, bg="#404040"))
                 grid_id_list[gridsize_v][-1].bind("<Button-1>", self.labelposget)
+                grid_id_list[gridsize_v][-1].bind("<Button-3>", self.labelblack, "+")
                 grid_id_list[gridsize_v][-1].pack(side=tk.LEFT)
             S_Frame_list[-1].pack(side=tk.TOP)
 
         ListboxYBar.pack(side=tk.RIGHT, fill=tk.Y)
+        ListboxYBar.config(command=NewListbox.yview)
+
         NewListbox.pack(side=tk.TOP, fill=tk.Y)
+
         ListboxXBar.pack(side=tk.TOP, fill=tk.X)
-        ListboxWordDelButton.pack(side=tk.TOP, anchor=tk.E)
-        NewListboxFrame.pack(side=tk.RIGHT, anchor=tk.N)
-        ListboxOptionsFrame.pack(side=tk.RIGHT, anchor=tk.N)
-        NewGridFrame.pack(side=tk.TOP)
-        deltabButton.pack(side=tk.LEFT)
+        ListboxXBar.config(command=NewListbox.xview)
+
+        ListboxFrame.pack(side=tk.TOP)
+        ListboxWordSortButton.pack(side=tk.LEFT)
+        ListboxWordDelButton.pack(side=tk.RIGHT)
+        ListboxOptionsFrame.pack(side=tk.TOP, fill=tk.X)
+        NewGridFrame.pack(side=tk.LEFT, anchor=tk.N)
+        ListboxBigFrame.pack(side=tk.TOP, anchor=tk.E)
+        deltabButton.pack(side=tk.BOTTOM, anchor=tk.E)
 
         #Add Tab
         self.Notebook.add(NewFrame, text=new_tab_name)
