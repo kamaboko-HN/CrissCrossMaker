@@ -14,7 +14,7 @@ from tabnanny import check
 from textwrap import fill
 from time import sleep
 import tkinter as tk
-from tkinter import CENTER, FLAT, LEFT, SOLID, Image, Variable, ttk
+from tkinter import CENTER, FLAT, LEFT, SOLID, Image, Menu, Variable, ttk
 from tkinter.tix import NoteBook
 from tkinter import filedialog
 from tkinter import messagebox
@@ -49,10 +49,16 @@ class Application(tk.Frame):
         fileMenu.add_command(label="終了", command=self.onexit)
         
         editMenu = tk.Menu(tearoff=0)
+        editMenu.add_command(label="やり直し")
+        editMenu.add_command(label="元に戻す")
         editMenu.add_command(label="全黒塗り", command=self.allgridblack)
+
+        tabMenu = tk.Menu(tearoff=0)
+        tabMenu.add_command(label="タブを閉じる", command=self.deltab)
 
         menuBar.add_cascade(label="ファイル", menu=fileMenu)
         menuBar.add_cascade(label="編集", menu=editMenu)
+        menuBar.add_cascade(label="タブ", menu=tabMenu)
 
         #New Notebooks commands
         newnotebookFlame = tk.LabelFrame(master, text="新規作成", width=540)
@@ -73,7 +79,7 @@ class Application(tk.Frame):
         newnotebookFlame.pack(side=tk.TOP, fill = tk.BOTH)
 
         #work flames
-        MainWorkFlame = tk.LabelFrame(master, text="マス", width=540)
+        MainWorkFlame = tk.LabelFrame(master, text="ワークスペース", width=540)
         self.Notebook = ttk.Notebook(MainWorkFlame)
         self.Notebook.bind("<Button-1>", self.selectnextnotebook)
 
@@ -398,11 +404,6 @@ class Application(tk.Frame):
                 label_id_list = tabs_data[4]
                 grid_word_list = tabs_data[3]
                 break
-        
-        #Return white
-        for labels in label_id_list:
-            for label in labels:
-                label.config(bg="#404040")
 
         for labels in label_id_list:
             if label_id in labels:
@@ -497,16 +498,18 @@ class Application(tk.Frame):
         #grid_size = int(self.GridSizeCombobox.get())
         NewFrame = tk.Frame(self.Notebook)
         NewGridFrame = tk.Frame(NewFrame, width=(int(grid_size)+2)*25, height=(int(grid_size)+2)*25)
-        ListboxBigFrame = tk.Frame(NewFrame, height=(int(grid_size)+2)*25)
-        ListboxFrame = tk.Frame(ListboxBigFrame)
-        ListboxOptionsFrame = tk.Frame(ListboxBigFrame)
-        NewListbox = tk.Listbox(ListboxFrame, width=40, height=20)
+        SideOptionsFrame = tk.Frame(NewFrame)
+        ListboxFrame = tk.Frame(SideOptionsFrame)
+        ListboxOptionsFrame = tk.Frame(SideOptionsFrame)
+        NewListbox = tk.Listbox(ListboxFrame, width=30, height=20)
         NewListbox.bind("<<ListboxSelect>>", self.selectword)
         ListboxYBar = tk.Scrollbar(ListboxFrame, orient=tk.VERTICAL)
+        NewListbox['yscrollcommand'] = ListboxYBar.set
         ListboxXBar = tk.Scrollbar(ListboxFrame, orient=tk.HORIZONTAL)
+        NewListbox['xscrollcommand'] = ListboxXBar.set
         ListboxWordDelButton = ttk.Button(ListboxOptionsFrame, text="削除", command=self.deleteword)
         ListboxWordSortButton = ttk.Button(ListboxOptionsFrame, text="音順:降")
-        deltabButton = ttk.Button(NewFrame, text="閉じる", command=self.deltab)
+        #deltabButton = ttk.Button(SideOptionsFrame, text="閉じる", command=self.deltab)
 
         #Make new grid  
 
@@ -535,9 +538,9 @@ class Application(tk.Frame):
         ListboxWordSortButton.pack(side=tk.LEFT)
         ListboxWordDelButton.pack(side=tk.RIGHT)
         ListboxOptionsFrame.pack(side=tk.TOP, fill=tk.X)
+        #deltabButton.pack(side=tk.BOTTOM, anchor=tk.E)
         NewGridFrame.pack(side=tk.LEFT, anchor=tk.N)
-        ListboxBigFrame.pack(side=tk.TOP, anchor=tk.E)
-        deltabButton.pack(side=tk.BOTTOM, anchor=tk.E)
+        SideOptionsFrame.pack(side=tk.LEFT, anchor=tk.N)
 
         #Add Tab
         self.Notebook.add(NewFrame, text=new_tab_name)
