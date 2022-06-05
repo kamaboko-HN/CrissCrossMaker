@@ -1,5 +1,5 @@
 from cgi import test
-from cgitb import enable
+from cgitb import enable, text
 from copy import deepcopy
 from ensurepip import version
 from faulthandler import disable
@@ -24,6 +24,7 @@ from numpy import imag
 from natsort import natsorted
 
 import Variables_List as VL
+import Listbox_Sort as LS
 
 ############################## ######################################################################
 #   Application Main Frame   # 
@@ -78,7 +79,7 @@ class Application(tk.Frame):
         newnotebookFlame.pack(side=tk.TOP, fill = tk.BOTH)
 
         #work flames
-        MainWorkFlame = tk.LabelFrame(master, text="マス", width=540)
+        MainWorkFlame = tk.LabelFrame(master, text="ワークスペース", width=540)
         self.Notebook = ttk.Notebook(MainWorkFlame)
         self.Notebook.bind("<Button-1>", self.selectnextnotebook)
 
@@ -157,6 +158,8 @@ class Application(tk.Frame):
                 grid_word_list = tabs_data[3]
                 grid_id_list = tabs_data[4]
                 listbox_data_list = tabs_data[7]
+                sort_rule = tabs_data[8]
+                Buttons = tabs_data[9]
                 break
         ###########################
         #長さの確認
@@ -286,6 +289,7 @@ class Application(tk.Frame):
                 listbox_data_list.append(append_listbox_data)
 
                 list_box.insert(0, add_word)
+                LS.CCMsort(Listboxobject=list_box, sort_type=sort_rule[0], up_or_down=sort_rule[1])
 
 
         
@@ -299,11 +303,9 @@ class Application(tk.Frame):
         elif self.WordDirections == "vertical":
             self.WordDirections = "side"
             self.SVSelectButton.config(text="現在:横")
-
 #########################
-#   NoteBook Commnads   #
+#   Listbox Commands    #
 #########################
-
     def deleteword(self, *event):
         for tabs_data in VL.TabsList:
             if tabs_data[0] == self.Notebook.select():
@@ -365,6 +367,44 @@ class Application(tk.Frame):
 
         list_box.delete(tk.ACTIVE)
         listbox_data_list.pop(data_index)
+
+    def switchAS(self):
+        for tabs_data in VL.TabsList:
+            if tabs_data[0] == self.Notebook.select():
+                list_box = tabs_data[6]
+                sort_rule = tabs_data[8]
+                Buttons = tabs_data[9]
+                break
+        
+        if sort_rule[0] == "alphabetical":
+            sort_rule[0] = "stroke"
+            Buttons[0].config(text="音順")
+        elif sort_rule[0] == "stroke":
+            sort_rule[0] = "alphabetical"
+            Buttons[0].config(text="文字数順")
+
+        LS.CCMsort(Listboxobject=list_box, sort_type=sort_rule[0], up_or_down=sort_rule[1])
+
+    def switchUPDOWN(self):
+        for tabs_data in VL.TabsList:
+            if tabs_data[0] == self.Notebook.select():
+                list_box = tabs_data[6]
+                sort_rule = tabs_data[8]
+                Buttons = tabs_data[9]
+                break
+        
+        if sort_rule[1] == False:
+            sort_rule[1] = True
+            Buttons[1].config(text="降")
+        elif sort_rule[1] == True:
+            sort_rule[1] = False
+            Buttons[1].config(text="昇")
+        
+        LS.CCMsort(Listboxobject=list_box, sort_type=sort_rule[0], up_or_down=sort_rule[1])
+
+#########################
+#   NoteBook Commands   #
+#########################
 
     def selectword(self, *event):
         for tabs_data in VL.TabsList:
@@ -485,8 +525,8 @@ class Application(tk.Frame):
         ListboxXBar = tk.Scrollbar(NewListboxFrame, orient=tk.HORIZONTAL)
 
         ListboxOptionsFrame = tk.Frame(NewGridOptionsFrame, bd=1)
-        ListboxSortbutton = ttk.Button(ListboxOptionsFrame, text="音順")
-        ListboxSortbutton_2 = ttk.Button(ListboxOptionsFrame, text="降")
+        ListboxSortbutton = ttk.Button(ListboxOptionsFrame, text="音順", command=self.switchAS)
+        ListboxSortbutton_2 = ttk.Button(ListboxOptionsFrame, text="降", width=3, command=self.switchUPDOWN)
         ListboxWordDelButton = ttk.Button(ListboxOptionsFrame, text="削除", command=self.deleteword)
 
         TabOptionsFrame = tk.Frame(NewGridOptionsFrame)
@@ -535,7 +575,9 @@ class Application(tk.Frame):
                 new_tab_lists[1], #[4] Grid ID list
                 new_tab_lists[2], #[5] Frame list
                 NewListbox, #[6]
-                new_listbox_data #[7]
+                new_listbox_data, #[7]
+                VL.default_sort_rule.copy(), #[8]
+                [ListboxSortbutton, ListboxSortbutton_2] #[9] [0 : alp or str][1 : up or down]
             ]
         )
         self.Notebook.select(self.Notebook.tabs()[-1])

@@ -90,3 +90,5 @@ Grid_Id_List_13 = [
 Grid_Id_List_20 = [
     [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
 ]
+
+default_sort_rule = ["stroke", True]
