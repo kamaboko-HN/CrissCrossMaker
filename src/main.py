@@ -1,7 +1,6 @@
 from cgi import test
 from cgitb import enable
 from copy import deepcopy
-from curses.ascii import TAB
 from ensurepip import version
 from faulthandler import disable
 from hashlib import new
