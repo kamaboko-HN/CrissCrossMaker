@@ -25,6 +25,8 @@ from natsort import natsorted
 
 import Variables_List as VL
 import Listbox_Sort as LS
+import save_and_load as SaL
+import Pull_tabs_data as Ptd
 
 ############################## ######################################################################
 #   Application Main Frame   # 
@@ -34,7 +36,7 @@ class Application(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
 
-        #Road Images
+        #Load Images
         for images in natsorted(glob.glob("img/*.png")):
             VL.word_img_list.append(tk.PhotoImage(file=images))
 
@@ -88,7 +90,7 @@ class Application(tk.Frame):
 
         #add words
         AddWordFlame = tk.LabelFrame(master, text="ワードの追加", width=540)
-        AddWordLabel = tk.Label(AddWordFlame, text="ワード：",)
+        AddWordLabel = tk.Label(AddWordFlame, text="ワード：")
         self.AddWordEntry = ttk.Entry(AddWordFlame, width=60)
         AddWordButton = ttk.Button(AddWordFlame, text="追加", command=self.addword)
         self.SelectLabel = tk.Label(AddWordFlame, text="1, 1")
@@ -151,16 +153,13 @@ class Application(tk.Frame):
         for w in words:
             words_id.append(VL.word_id_list.index(w) + 2)
         
-        for tabs_data in VL.TabsList:
-            if tabs_data[0] == self.Notebook.select():
-                list_box = tabs_data[6]
-                grid_size = int(tabs_data[2])
-                grid_word_list = tabs_data[3]
-                grid_id_list = tabs_data[4]
-                listbox_data_list = tabs_data[7]
-                sort_rule = tabs_data[8]
-                Buttons = tabs_data[9]
-                break
+        list_box = Ptd.pulltabsdata(self.Notebook.select())[6]
+        grid_size = int(Ptd.pulltabsdata(self.Notebook.select())[2])
+        grid_word_list = Ptd.pulltabsdata(self.Notebook.select())[3]
+        grid_id_list = Ptd.pulltabsdata(self.Notebook.select())[4]
+        listbox_data_list = Ptd.pulltabsdata(self.Notebook.select())[7]
+        sort_rule = Ptd.pulltabsdata(self.Notebook.select())[8]
+        Buttons = Ptd.pulltabsdata(self.Notebook.select())[9]
         ###########################
         #長さの確認
         if self.WordDirections == "side":
@@ -307,14 +306,11 @@ class Application(tk.Frame):
 #   Listbox Commands    #
 #########################
     def deleteword(self, *event):
-        for tabs_data in VL.TabsList:
-            if tabs_data[0] == self.Notebook.select():
-                list_box = tabs_data[6]
-                grid_size = int(tabs_data[2])
-                grid_word_list = tabs_data[3]
-                grid_id_list = tabs_data[4]
-                listbox_data_list = tabs_data[7]
-                break
+        list_box = Ptd.pulltabsdata(self.Notebook.select())[6]
+        grid_size = int(Ptd.pulltabsdata(self.Notebook.select())[2])
+        grid_word_list = Ptd.pulltabsdata(self.Notebook.select())[3]
+        grid_id_list = Ptd.pulltabsdata(self.Notebook.select())[4]
+        listbox_data_list = Ptd.pulltabsdata(self.Notebook.select())[7]
 
         now_select_word = list_box.get(tk.ACTIVE)
         for data in listbox_data_list:
@@ -369,12 +365,9 @@ class Application(tk.Frame):
         listbox_data_list.pop(data_index)
 
     def switchAS(self):
-        for tabs_data in VL.TabsList:
-            if tabs_data[0] == self.Notebook.select():
-                list_box = tabs_data[6]
-                sort_rule = tabs_data[8]
-                Buttons = tabs_data[9]
-                break
+        list_box = Ptd.pulltabsdata(self.Notebook.select())[6]
+        sort_rule = Ptd.pulltabsdata(self.Notebook.select())[8]
+        Buttons = Ptd.pulltabsdata(self.Notebook.select())[9]
         
         if sort_rule[0] == "alphabetical":
             sort_rule[0] = "stroke"
@@ -386,12 +379,9 @@ class Application(tk.Frame):
         LS.CCMsort(Listboxobject=list_box, sort_type=sort_rule[0], up_or_down=sort_rule[1])
 
     def switchUPDOWN(self):
-        for tabs_data in VL.TabsList:
-            if tabs_data[0] == self.Notebook.select():
-                list_box = tabs_data[6]
-                sort_rule = tabs_data[8]
-                Buttons = tabs_data[9]
-                break
+        list_box = Ptd.pulltabsdata(self.Notebook.select())[6]
+        sort_rule = Ptd.pulltabsdata(self.Notebook.select())[8]
+        Buttons = Ptd.pulltabsdata(self.Notebook.select())[9]
         
         if sort_rule[1] == False:
             sort_rule[1] = True
@@ -407,12 +397,9 @@ class Application(tk.Frame):
 #########################
 
     def selectword(self, *event):
-        for tabs_data in VL.TabsList:
-            if tabs_data[0] == self.Notebook.select():
-                list_box = tabs_data[6]
-                grid_id_list = tabs_data[4]
-                listbox_data_list = tabs_data[7]
-                break
+        list_box = Ptd.pulltabsdata(self.Notebook.select())[6]
+        grid_id_list = Ptd.pulltabsdata(self.Notebook.select())[4]
+        listbox_data_list = Ptd.pulltabsdata(self.Notebook.select())[7]
         if list_box.size() > 0:
             now_select_word = list_box.get(tk.ACTIVE)
             for data in listbox_data_list:
@@ -439,10 +426,7 @@ class Application(tk.Frame):
     def labelposget(self, event):
         label_id = event.widget
         label_id.config(bg="red")
-        for tabs_data in VL.TabsList:
-            if tabs_data[0] == self.Notebook.select():
-                label_id_list = tabs_data[4]
-                break
+        label_id_list = Ptd.pulltabsdata(self.Notebook.select())[4]
         
         for labels in label_id_list:
             for label in labels:
@@ -468,9 +452,7 @@ class Application(tk.Frame):
         win_W = self.master.winfo_geometry()
 
     def deltab(self, *event):
-        for tab_data_list in VL.TabsList:
-            if tab_data_list[0] == self.Notebook.select():
-                VL.TabsList.remove(tab_data_list)
+        VL.TabsList.remove(Ptd.pulltabsdata(self.Notebook.select())[-1])
         self.Notebook.forget(self.Notebook.select())
 
 ##################################
@@ -478,37 +460,38 @@ class Application(tk.Frame):
 ##################################
     def newnotebook_and_makebuttonactive(self, *event):
         gridsize = int(self.GridSizeCombobox.get())
-        self.newnotebook(new_tab_name=self.TabNameEntry.get()+" "+str(gridsize)+"x"+str(gridsize), grid_size=gridsize, ifload=False)
-        self.makebuttonactive()
-
-    def newnotebook(self, new_tab_name, grid_size, ifload, *l_grid_list, **l_listbox_data_list):
 
         #Make grid state list and listbox wordlist
+        if (gridsize == 7):
+            new_grid_list = deepcopy(VL.Grid_List_Original_7)
+        elif (gridsize == 12):
+            new_grid_list = deepcopy(VL.Grid_List_Original_12)
+        elif (gridsize == 13):
+            new_grid_list = deepcopy(VL.Grid_List_Original_13)
+        elif (gridsize == 20):
+            new_grid_list = deepcopy(VL.Grid_List_Original_20)
+
+        new_listbox_data = []
+
+        self.newnotebook(
+            new_tab_name=self.TabNameEntry.get()+" "+str(gridsize)+"x"+str(gridsize),
+            grid_size=gridsize, grid_list=new_grid_list, listbox_data=new_listbox_data)
+
+        self.makebuttonactive()
+
+    def newnotebook(self, new_tab_name, grid_size, grid_list, listbox_data):
         if (grid_size == 7):
-            if (ifload == False):
-                grid_list = deepcopy(VL.Grid_List_Original_7)
             grid_id_list = deepcopy(VL.Grid_Id_List_7)
         elif (grid_size == 12):
-            if (ifload == False):
-                grid_list = deepcopy(VL.Grid_List_Original_12)
             grid_id_list = deepcopy(VL.Grid_Id_List_12)
         elif (grid_size == 13):
-            if (ifload == False):
-                grid_list = deepcopy(VL.Grid_List_Original_13)
             grid_id_list = deepcopy(VL.Grid_Id_List_13)
         elif (grid_size == 20):
-            if (ifload == False):
-                grid_list = deepcopy(VL.Grid_List_Original_20)
             grid_id_list = deepcopy(VL.Grid_Id_List_20)
+
         S_Frame_list = deepcopy(VL.Side_Frame_list)
-
+            
         new_tab_lists = [grid_list, grid_id_list, S_Frame_list]
-
-        if (ifload == True):
-            grid_list = l_grid_list
-            new_listbox_data = l_listbox_data_list
-        elif (ifload == False):
-            new_listbox_data = []
         
         #grid_size = int(self.GridSizeCombobox.get())
         NewFrame = tk.Frame(self.Notebook, bd=1)
@@ -540,6 +523,8 @@ class Application(tk.Frame):
             for gridsize_s in range(grid_size):
                 #grids
                 ##print(grid_list[gridsize_v][gridsize_s])
+                print(str(gridsize_v) + "," + str(gridsize_s))
+                print(grid_list[gridsize_v][gridsize_s])
                 load_img = VL.word_img_list[grid_list[gridsize_v][gridsize_s]]
                 grid_id_list[gridsize_v].append(tk.Label(S_Frame_list[gridsize_v], image=load_img, bg="#404040"))
                 grid_id_list[gridsize_v][-1].bind("<Button-1>", self.labelposget)
@@ -562,7 +547,9 @@ class Application(tk.Frame):
         NewGridFrame.pack(side=tk.LEFT, anchor=tk.N)
         NewGridOptionsFrame.pack(side=tk.LEFT, anchor=tk.N, fill=tk.Y)
         
-        
+        if listbox_data != []:
+            for data in listbox_data:
+                NewListbox.insert(0, data[0])
 
         #Add Tab
         self.Notebook.add(NewFrame, text=new_tab_name)
@@ -575,12 +562,13 @@ class Application(tk.Frame):
                 new_tab_lists[1], #[4] Grid ID list
                 new_tab_lists[2], #[5] Frame list
                 NewListbox, #[6]
-                new_listbox_data, #[7]
+                listbox_data, #[7]
                 VL.default_sort_rule.copy(), #[8]
                 [ListboxSortbutton, ListboxSortbutton_2] #[9] [0 : alp or str][1 : up or down]
             ]
         )
         self.Notebook.select(self.Notebook.tabs()[-1])
+        return self.Notebook.tabs()[-1]
 
     def makebuttonactive(self):
         self.EnterButton.config(state=tk.NORMAL)
@@ -593,58 +581,11 @@ class Application(tk.Frame):
         self.quit()
 
     def savefile(self, *event):
-        now_select_tab = self.Notebook.select()
-        for tab_data_list in VL.TabsList:
-            if tab_data_list[0] == now_select_tab:
-                TAB_DATA = tab_data_list.copy()
-
-        tab_name = TAB_DATA[1]
-        
-        filename = filedialog.asksaveasfilename(defaultextension="txt", filetypes=[('Text', '*.txt')], initialfile=tab_name)
-
-        if (filename != ""):
-            #self.savingwindowshow()
-            #self.Sapp
-
-            with open(filename, mode="w", encoding="utf-8") as to_save:
-                to_save.write(tab_name + "\n") #project name
-                to_save.write(str(TAB_DATA[2]) + "\n") #grid size
-                
-                #grid datas
-                for grid_datas in TAB_DATA[3]:
-                    for grid_data in grid_datas:
-                        to_save.write(str(grid_data) + ",")
-                    to_save.write("\n")
-
-                to_save.write("\nlist_data\n")
-                for list_datas in TAB_DATA[7]:
-                    to_save.write(list_datas[0] + "," + str(list_datas[1]) + "," + list_datas[2] + "," + str(list_datas[3]) + "," + str(list_datas[4]) + "\n")
-            #savingwindowdestroy()
+        SaL.CCM_save(self.Notebook.select())
             
     def loadfile(self, *event):
-        filename = filedialog.askopenfilename(defaultextension="txt", filetypes=[('Text', '*.txt')])
-        if (filename != ""):
-            with open(filename, mode="r") as load_file:
-                loadfiledata_original = load_file.readlines()
-            load_file_data = []
-            load_grid_list = []
-            count = 0
-            for data in loadfiledata_original:
-                data_s = data.strip("\n")
-                if (count == 0):
-                    load_file_data.append(data_s)
-
-                elif (count == 1):
-                    load_file_data.append(data_s)
-
-                elif (count > 1):
-                    data_s_2 = data_s.split(",")
-                    data_s_2.pop()
-                    data_s = [int(s) for s in data_s_2]
-                    load_grid_list.append(data_s)
-
-                count += 1
-            self.newnotebook(new_tab_name=load_file_data[0], grid_size=int(load_file_data[1]), ifload=True, l_grid_list=load_grid_list)
+        ntl = SaL.CCM_load()
+        nowmake = self.newnotebook(new_tab_name=ntl[0], grid_size=ntl[1], grid_list=ntl[2], listbox_data=ntl[3])
 
     def savingwindowshow(self):
         Swin = tk.Tk()
@@ -652,11 +593,9 @@ class Application(tk.Frame):
         Sapp.mainloop()
 
     def allgridblack(self, *event):
-        for tabs_data in VL.TabsList:
-            if tabs_data[0] == self.Notebook.select():
-                grid_word_list = tabs_data[3]
-                grid_id_list = tabs_data[4]
-                break
+        grid_word_list = Ptd.pulltabsdata(self.Notebook.select())[3]
+        grid_id_list = Ptd.pulltabsdata(self.Notebook.select())[4]
+
         x_count = 0
         y_count = 0
         for y_grid_word_list in grid_word_list:
