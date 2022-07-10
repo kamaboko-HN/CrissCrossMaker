@@ -27,6 +27,7 @@ import Variables_List as VL
 import Listbox_Sort as LS
 import save_and_load as SaL
 import Pull_tabs_data as Ptd
+import OutputExcel as OpE
 
 ############################## ######################################################################
 #   Application Main Frame   # 
@@ -49,7 +50,7 @@ class Application(tk.Frame):
         fileMenu.add_command(label="保存", command=self.savefile)
         fileMenu.add_command(label="開く", command=self.loadfile)
         fileMenu.add_separator()
-        fileMenu.add_command(label="出力")
+        fileMenu.add_command(label="出力", command=self.output)
         fileMenu.add_separator()
         fileMenu.add_command(label="終了", command=self.onexit)
         
@@ -118,6 +119,7 @@ class Application(tk.Frame):
         #short cut binds
         self.master.bind("<Control-s>", self.savefile)
         self.master.bind("<Control-l>", self.loadfile)
+        self.master.bind("<Control-o>", self.output)
         self.master.bind("<Control-b>", self.allgridblack)
 
         self.master.bind("<Control-n>", self.newnotebook_and_makebuttonactive)
@@ -126,8 +128,6 @@ class Application(tk.Frame):
 
         self.master.bind("<Control-w>", self.deltab)
         self.master.bind("<Control-e>", self.deleteword)
-        #self.master.bind("<Button-1>", self.selectword)
-
 ###############################     
 #   Add Word Frame Commands   #     
 ###############################     
@@ -504,8 +504,10 @@ class Application(tk.Frame):
         NewListboxFrame = tk.Frame(NewGridOptionsFrame, height=(int(grid_size)+2)*25, bd=1)
         NewListbox = tk.Listbox(NewListboxFrame, width=30, height=20)
         NewListbox.bind("<<ListboxSelect>>", self.selectword)
-        ListboxYBar = tk.Scrollbar(NewListboxFrame, orient=tk.VERTICAL)
-        ListboxXBar = tk.Scrollbar(NewListboxFrame, orient=tk.HORIZONTAL)
+        ListboxYBar = tk.Scrollbar(NewListboxFrame, orient=tk.VERTICAL, command=NewListbox.yview)
+        NewListbox["yscrollcommand"] = ListboxYBar.set
+        ListboxXBar = tk.Scrollbar(NewListboxFrame, orient=tk.HORIZONTAL, command=NewListbox.xview)
+        NewListbox["xscrollcommand"] = ListboxXBar.set
 
         ListboxOptionsFrame = tk.Frame(NewGridOptionsFrame, bd=1)
         ListboxSortbutton = ttk.Button(ListboxOptionsFrame, text="音順", command=self.switchAS)
@@ -586,6 +588,9 @@ class Application(tk.Frame):
     def loadfile(self, *event):
         ntl = SaL.CCM_load()
         nowmake = self.newnotebook(new_tab_name=ntl[0], grid_size=ntl[1], grid_list=ntl[2], listbox_data=ntl[3])
+
+    def output(self):
+        opwindow = OpE.outputshow()
 
     def savingwindowshow(self):
         Swin = tk.Tk()
